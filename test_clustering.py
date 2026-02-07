@@ -56,8 +56,8 @@ def test_model(model, model_name, img_array, pixels):
 
 def main():
 	print("IMAGE SEGMENTATION - TESTING CLUSTERING MODELS")
-	# img_array, pixels = load_and_prepare_image("img/cat.png")  # Use your image path
-    # Or try: img_array, pixels = load_and_prepare_image("your_image.jpg")
+	# Uncomment the next 2 lines and comment out the synthetic image code
+	#img_array, pixels = load_and_prepare_image("img/cat.png")  # Use your image path
     
 	print("\nCreating synthetic test image...")
 	test_img = np.zeros((200, 200, 3), dtype=np.uint8)
