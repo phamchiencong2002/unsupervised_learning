@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from sklearn.cluster import KMeans, DBSCAN, MeanShift
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.mixture import GaussianMixture
 
 class ClusteringModel(ABC):
     """Abstract base class for clustering models."""
@@ -38,25 +39,23 @@ class KMeansModel(ClusteringModel):
         self.n_clusters = n_clusters
         self.model = KMeans(n_clusters=self.n_clusters, random_state=42, n_init=10)
 
-class MeanShiftModel(ClusteringModel):
-    """Mean Shift clustering models."""
-
-    def __init__(self, bandwidth=50):
+class GMMModel(ClusteringModel):
+    def __init__(self, n_components=5):
         super().__init__()
-        self.bandwidth = bandwidth
-        self.model = MeanShift(bandwidth=self.bandwidth)
+        self.n_components = n_components
+        self.model = GaussianMixture(n_components=self.n_components, random_state=42)
 
     def fit_predict(self, pixels):
         self.labels_ = self.model.fit_predict(pixels)
         return self.labels_
     
     def get_parameters(self):
-        return {"bandwidth": self.bandwidth}
+        return {"n_components": self.n_components}
     
-    def set_bandwidth(self, bandwidth):
-        self.bandwidth = bandwidth
-        self.model = MeanShift(bandwidth=self.bandwidth)
-
+    def set_n_components(self, n_components):
+        self.n_components = n_components
+        self.model = GaussianMixture(n_components=self.n_components, random_state=42)
+     
 class DBSCANModel(ClusteringModel):
     """DBSCAN clustering model"""
     

@@ -1,13 +1,15 @@
 """
     Test clustering with your actual image
-    This script loads your image, and compares all 3 clustering models (K-Means, Mean Shift, DBSCAN) on it.
+    This script loads your image, and compares all 3 clustering models (K-Means, GMM, DBSCAN) on it.
 """
 
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-from clustering_models import KMeansModel, MeanShiftModel, DBSCANModel
+from clustering_models import GMMModel, KMeansModel, DBSCANModel
 import sys
+from pathlib import Path
+from datetime import datetime
 
 def load_and_prepare_image(img_path, max_size=400):
     try:
@@ -89,6 +91,14 @@ def main():
     
     # Load image
     img_array, pixels = load_and_prepare_image(image_path)
+
+    # Prepare results directory
+    results_root = Path("results")
+    results_root.mkdir(parents=True, exist_ok=True)
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_dir = results_root / f"run_{run_id}"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    print(f"\n✓ Saving outputs to: {run_dir}")
     
     # Test all three models with optimized parameters for real photos
     print("\n" + "="*60)
@@ -96,8 +106,8 @@ def main():
     print("="*60)
     
     models_to_test = [
-        (KMeansModel(n_clusters=5), "K-Means (5 clusters)"),
-        (MeanShiftModel(bandwidth=120), "Mean Shift (bandwidth=120)"),
+        (KMeansModel(n_clusters=6), "K-Means (6 clusters)"),
+        (GMMModel(n_components=6), "GMM (6 components)"),
         (DBSCANModel(eps=10, min_samples=5), "DBSCAN (eps=10, min_samples=5)")
     ]
     
@@ -132,7 +142,7 @@ def main():
     plt.tight_layout()
     
     # Save result
-    output_file = 'comparison_result.png'
+    output_file = run_dir / "comparison_result.png"
     plt.savefig(output_file, dpi=150, bbox_inches='tight')
     print(f"\n✓ Results saved to: {output_file}")
     print(f"✓ Opening visualization window...")
@@ -142,8 +152,12 @@ def main():
     print("\n" + "="*60)
     print("SUMMARY")
     print("="*60)
+    summary_lines = []
     for (name, _), n_clusters in zip(results, cluster_counts):
-        print(f"  {name}: {n_clusters} clusters")
+        line = f"  {name}: {n_clusters} clusters"
+        print(line)
+        summary_lines.append(line)
+
     
     print("\n" + "="*60)
     print("Testing complete!")

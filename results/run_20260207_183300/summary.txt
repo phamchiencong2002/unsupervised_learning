@@ -1,0 +1,3 @@
+  K-Means (6 clusters): 6 clusters
+  GMM (6 components): 6 clusters
+  DBSCAN (eps=10, min_samples=5): 2 clusters

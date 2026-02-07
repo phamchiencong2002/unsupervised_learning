@@ -2,7 +2,7 @@ from xml.parsers.expat import model
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from clustering_models import KMeansModel, MeanShiftModel, DBSCANModel
+from clustering_models import GMMModel, KMeansModel, DBSCANModel
 
 
 def load_and_prepare_image(img_path):
@@ -73,7 +73,7 @@ def main():
 
 	models_to_test = [
 		(KMeansModel(n_clusters=4), "K-Means (4 clusters)"),
-		(MeanShiftModel(bandwidth=30), "Mean Shift (bandwidth=30)"),
+		(GMMModel(n_components=4), "GMM (4 components)"),
 		(DBSCANModel(eps=10, min_samples=5), "DBSCAN (eps=10, min_samples=5)")
 	]
 
