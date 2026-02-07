@@ -108,7 +108,7 @@ def main():
     models_to_test = [
         (KMeansModel(n_clusters=6), "K-Means (6 clusters)"),
         (GMMModel(n_components=6), "GMM (6 components)"),
-        (DBSCANModel(eps=10, min_samples=5), "DBSCAN (eps=10, min_samples=5)")
+        (DBSCANModel(eps=8, min_samples=5), "DBSCAN (eps=8, min_samples=5)")
     ]
     
     results = []
