@@ -2,6 +2,8 @@
 from PIL import Image, ImageTk
 
 st.title("Image processing")
+#st.sidebar.selectbox()
+
 st.set_page_config(page_title="Image processing", page_icon="res/icon.png")
 
 @st.cache_data

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from sklearn.cluster import KMeans, DBSCAN
+from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.mixture import GaussianMixture
 
 class ClusteringModel(ABC):
@@ -56,25 +56,19 @@ class GMMModel(ClusteringModel):
         self.n_components = n_components
         self.model = GaussianMixture(n_components=self.n_components, random_state=42)
      
-class DBSCANModel(ClusteringModel):
-    """DBSCAN clustering model"""
-    
-    def __init__(self, eps=10, min_samples=5):
+class AgglomerativeModel(ClusteringModel):
+    def __init__(self, n_clusters=5):
         super().__init__()
-        self.eps = eps
-        self.min_samples = min_samples
-        self.model = DBSCAN(eps=eps, min_samples=min_samples)
-    
+        self.n_clusters = n_clusters
+        self.model = AgglomerativeClustering(n_clusters=self.n_clusters)
+
     def fit_predict(self, pixels):
-        """Apply DBSCAN clustering"""
         self.labels_ = self.model.fit_predict(pixels)
         return self.labels_
-    
+
     def get_parameters(self):
-        return {"eps": self.eps, "min_samples": self.min_samples}
-    
-    def set_parameters(self, eps, min_samples):
-        """Update DBSCAN parameters"""
-        self.eps = eps
-        self.min_samples = min_samples
-        self.model = DBSCAN(eps=eps, min_samples=min_samples)
+        return {"n_clusters": self.n_clusters}
+
+    def set_n_clusters(self, n_clusters):
+        self.n_clusters = n_clusters
+        self.model = AgglomerativeClustering(n_clusters=self.n_clusters)

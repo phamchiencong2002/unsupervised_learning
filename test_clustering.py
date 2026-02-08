@@ -2,7 +2,7 @@ from xml.parsers.expat import model
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from clustering_models import GMMModel, KMeansModel, DBSCANModel
+from clustering_models import GMMModel, KMeansModel
 
 
 def load_and_prepare_image(img_path):

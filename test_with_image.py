@@ -1,15 +1,11 @@
-"""
-    Test clustering with your actual image
-    This script loads your image, and compares all 3 clustering models (K-Means, GMM, DBSCAN) on it.
-"""
-
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-from clustering_models import GMMModel, KMeansModel, DBSCANModel
-import sys
+from sklearn.cluster import AgglomerativeClustering
+from clustering_models import AgglomerativeModel, GMMModel, KMeansModel
 from pathlib import Path
 from datetime import datetime
+import sys
 
 def load_and_prepare_image(img_path, max_size=400):
     try:
@@ -27,6 +23,7 @@ def load_and_prepare_image(img_path, max_size=400):
 
         # Reshape (height, width, 3) -> (height * width, 3)
         pixels = img_array.reshape(-1, 3)
+
         print(f"Image loaded: {img_path}")
         print(f"Processing size: {img_array.shape}")
         print(f"Total pixels: {pixels.shape[0]:,}")
@@ -50,7 +47,7 @@ def create_segmented_image(original_shape, labels):
     if -1 in unique_labels:
         label_map = {label : i for i, label in enumerate(unique_labels)}
         mapped_labels = np.array([label_map[l] for l in labels])
-        print(f" DBSCAN detected noise points: {np.sum(labels == -1)}")
+
     else:
         mapped_labels = labels
 
@@ -66,7 +63,25 @@ def test_model(model, model_name, img_array, pixels):
     print(f"Parameters: {model.get_parameters()}")
     print(f"{'='*60}")
 
-    labels = model.fit_predict(pixels)
+    if isinstance(model, AgglomerativeModel):
+        from sklearn.feature_extraction.image import grid_to_graph
+        
+        # Get image dimensions
+        h, w = img_array.shape[:2]
+        
+        # Create connectivity graph (spatial neighbors only)
+        connectivity = grid_to_graph(h, w)
+        
+        # Now fit with connectivity
+        agglom = AgglomerativeClustering(
+            n_clusters=model.n_clusters,
+            connectivity=connectivity,
+            linkage='ward'
+        )
+        labels = agglom.fit_predict(pixels)
+    else:
+        labels = model.fit_predict(pixels)
+    
     n_clusters = len(np.unique(labels))
 
     print(f" Clusters found: {n_clusters}")
@@ -108,7 +123,7 @@ def main():
     models_to_test = [
         (KMeansModel(n_clusters=6), "K-Means (6 clusters)"),
         (GMMModel(n_components=6), "GMM (6 components)"),
-        (DBSCANModel(eps=8, min_samples=5), "DBSCAN (eps=8, min_samples=5)")
+        (AgglomerativeModel(n_clusters=8), "Agglomerative (8     clusters)")
     ]
     
     results = []
