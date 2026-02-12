@@ -1,64 +1,31 @@
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from clustering_models import AgglomerativeModel, GMMModel, KMeansModel
-
-
-
-def load_and_prepare_image(img_path):
-	img = Image.open(img_path)
-	img = img.convert('RGB')
-	img_array = np.array(img)
-
-	# Reshape (height, width, 3) -> (height * width, 3)
-	pixels = img_array.reshape(-1,3)
-	print(f"Image loaded: {img_path}")
-	print(f"Image shape: {img_array.shape}")
-	print(f"Pixels shape: {pixels.shape}")
-	print(f"Data type: {img_array.dtype}")
-
-	return img_array, pixels
+from clustering_models import DBSCANModel, GMMModel, KMeansModel
 
 def create_segmented_image(original_shape, labels):
 	unique_labels = np.unique(labels)
 	n_clusters = len(unique_labels)
-
-	print(f"Clustering produced {n_clusters} clusters.")
-	print(f"Unique labels: {unique_labels}")
-
 	np.random.seed(42)
 	palette = np.random.randint(0, 255, (n_clusters, 3))
+	segmented = palette[labels].reshape(original_shape)
 
-	# Handle DBSCAN noise (-1 label) if present
-	if -1 in unique_labels:
-		label_map = {label : i for i, label in enumerate(unique_labels)}
-		mapped_labels = np.array([label_map[l] for l in labels])
-		print(f" DBSCAN detected noise points: {np.sum(labels == -1)}")
-	else:
-		mapped_labels = labels
-
-	# Map labels to colors
-	segmented = palette[mapped_labels]
-	segmented_img = segmented.reshape(original_shape)
-
-	return segmented_img.astype(np.uint8)
+	return segmented.astype(np.uint8), n_clusters
 
 def test_model(model, model_name, img_array, pixels):
 	print(f"\n{'='*60}")
 	print(f"Testing: {model_name}")
 	print(f"Parameters: {model.get_parameters()}")
-	print(f"{'='*60}")
 
 	labels = model.fit_predict(pixels)
-
-	segmented = create_segmented_image(img_array.shape, labels)
-	return segmented
+	segmented, n_clusters = create_segmented_image(img_array.shape, labels)
+	print(f" Clusters found: {n_clusters}")
+	return segmented, n_clusters
 
 def main():
 	print("IMAGE SEGMENTATION - TESTING CLUSTERING MODELS")
-	# Uncomment the next 2 lines and comment out the synthetic image code
-	#img_array, pixels = load_and_prepare_image("img/cat.png")  # Use your image path
-    
+	print("="*60)
+	
 	print("\nCreating synthetic test image...")
 	test_img = np.zeros((200, 200, 3), dtype=np.uint8)
 	test_img[:100, :100] = [255, 0, 0]      # Red
@@ -69,45 +36,37 @@ def main():
 	img_array = test_img
 	pixels = img_array.reshape(-1, 3)
 
-	print(f"Test image created: {img_array.shape}")
+	print(f"Test image created: {img_array.shape} ({pixels.shape[0]} pixels)")
 
-	models_to_test = [
+	models = [
 		(KMeansModel(n_clusters=4), "K-Means (4 clusters)"),
 		(GMMModel(n_components=4), "GMM (4 components)"),
-		(AgglomerativeModel(n_clusters=4), "Agglomerative (4 clusters)"),
+		(DBSCANModel(eps=0.15, min_samples=20), "DBSCAN (eps=0.15, min_samples=50)"),
 	]
 
 	results = []
-	for model, name in models_to_test:
-		segmented = test_model(model, name, img_array, pixels)
-		results.append((name, segmented))
+	for model, name in models:
+		seg, n = test_model(model, name, img_array, pixels)
+		results.append((name, seg, n))
 	
-	# Display results
-	# Create figure with 1 row, N columns for better visualization
-	fig_cols = 1 + len(results)
-	fig, axes = plt.subplots(1, fig_cols, figsize=(5 * fig_cols, 5))
+	# Plot results
+	n_cols = 1 + len(results)
+	fig, axes = plt.subplots(1, n_cols, figsize=(5 * n_cols, 5))
 
 	axes[0].imshow(img_array)
-	axes[0].set_title("Original Image", fontsize=14, fontweight='bold')
-	axes[0].axis('off')
+	axes[0].set_title("Original", fontsize=14, fontweight="bold")
+	axes[0].axis("off")
 
-	# Segmented results
-	for idx, (name, seg_img) in enumerate(results):
-		axes[idx + 1].imshow(seg_img)
-		axes[idx + 1].set_title (name, fontsize=14, fontweight='bold')
-		axes[idx + 1].axis('off')
-	
-	plt.suptitle(f"Image Segmentation - Comparing {len(results)} Clustering Models", 
-                 fontsize=16, fontweight='bold', y=0.98)
+	for i, (name, seg, n) in enumerate(results):
+		axes[i + 1].imshow(seg)
+		axes[i + 1].set_title(f"{name}\n({n} clusters)", fontsize=12, fontweight="bold")
+		axes[i + 1].axis("off")
+
+	plt.suptitle("Comparing 3 Clustering Models", fontsize=16, fontweight="bold")
 	plt.tight_layout()
-	#plt.savefig('test_clustering_results.png', dpi=150, bbox_inches='tight')
-	#print("\n✓ Results saved to: test_clustering_results.png")
 	plt.show()
-    
-	print("\n" + "="*60)
-	print("Testing complete! You can now run the GUI application.")
-	print("Run: python appstr_imageprocessing.py")
-	print("="*60)
+
+	print("\nDone!")
 
 if __name__ == "__main__":
-    main()
+	main()

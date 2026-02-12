@@ -68,7 +68,7 @@ class DBSCANModel(ClusteringModel):
             labels = self._fit_direct(pixels_norm)
         else:
             # Large image -> subsample strategy
-            labels = self.fit_with_subsample(pixels_norm)
+            labels = self._fit_with_subsample(pixels_norm)
         
         # Clean up: remap noise (-1) and make labels contiguous
         labels = self._handle_noise(labels, pixels_norm)
