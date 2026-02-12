@@ -1,8 +1,8 @@
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-from sklearn.cluster import AgglomerativeClustering
 from clustering_models import AgglomerativeModel, GMMModel, KMeansModel
+from sklearn.feature_extraction import grid_to_graph
 from pathlib import Path
 from datetime import datetime
 import sys
@@ -63,24 +63,7 @@ def test_model(model, model_name, img_array, pixels):
     print(f"Parameters: {model.get_parameters()}")
     print(f"{'='*60}")
 
-    if isinstance(model, AgglomerativeModel):
-        from sklearn.feature_extraction.image import grid_to_graph
-        
-        # Get image dimensions
-        h, w = img_array.shape[:2]
-        
-        # Create connectivity graph (spatial neighbors only)
-        connectivity = grid_to_graph(h, w)
-        
-        # Now fit with connectivity
-        agglom = AgglomerativeClustering(
-            n_clusters=model.n_clusters,
-            connectivity=connectivity,
-            linkage='ward'
-        )
-        labels = agglom.fit_predict(pixels)
-    else:
-        labels = model.fit_predict(pixels)
+    labels = model.fit_predict(pixels)
     
     n_clusters = len(np.unique(labels))
 
@@ -120,10 +103,14 @@ def main():
     print("TESTING 3 CLUSTERING MODELS")
     print("="*60)
     
+    # Create connectivity graph for agglomerative clustering
+    h, w = img_array.shape[:2]
+    connectivity = grid_to_graph(h, w)
+    
     models_to_test = [
         (KMeansModel(n_clusters=6), "K-Means (6 clusters)"),
         (GMMModel(n_components=6), "GMM (6 components)"),
-        (AgglomerativeModel(n_clusters=8), "Agglomerative (8     clusters)")
+        (AgglomerativeModel(n_clusters=12, linkage="ward", connectivity=connectivity), "Agglomerative (8 clusters)")
     ]
     
     results = []
@@ -139,7 +126,8 @@ def main():
     print("DISPLAYING RESULTS")
     print(f"{'='*60}")
     
-    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+    fig_cols = 1 + len(results)
+    fig, axes = plt.subplots(1, fig_cols, figsize=(5 * fig_cols, 5))
     
     # Original
     axes[0].imshow(img_array)
@@ -152,7 +140,7 @@ def main():
         axes[idx + 1].set_title(title, fontsize=14, fontweight='bold', pad=10)
         axes[idx + 1].axis('off')
     
-    plt.suptitle(f"Comparing 3 Clustering Models on: {image_path}", 
+    plt.suptitle(f"Comparing {len(results)} Clustering Models on: {image_path}", 
                  fontsize=16, fontweight='bold', y=0.98)
     plt.tight_layout()
     

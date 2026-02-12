@@ -1,8 +1,8 @@
-from xml.parsers.expat import model
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from clustering_models import GMMModel, KMeansModel
+from clustering_models import AgglomerativeModel, GMMModel, KMeansModel
+
 
 
 def load_and_prepare_image(img_path):
@@ -74,7 +74,7 @@ def main():
 	models_to_test = [
 		(KMeansModel(n_clusters=4), "K-Means (4 clusters)"),
 		(GMMModel(n_components=4), "GMM (4 components)"),
-		(DBSCANModel(eps=10, min_samples=5), "DBSCAN (eps=10, min_samples=5)")
+		(AgglomerativeModel(n_clusters=4), "Agglomerative (4 clusters)"),
 	]
 
 	results = []
@@ -83,8 +83,9 @@ def main():
 		results.append((name, segmented))
 	
 	# Display results
-	# Create figure with 1 row, 4 columns for better visualization
-	fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+	# Create figure with 1 row, N columns for better visualization
+	fig_cols = 1 + len(results)
+	fig, axes = plt.subplots(1, fig_cols, figsize=(5 * fig_cols, 5))
 
 	axes[0].imshow(img_array)
 	axes[0].set_title("Original Image", fontsize=14, fontweight='bold')
@@ -96,7 +97,7 @@ def main():
 		axes[idx + 1].set_title (name, fontsize=14, fontweight='bold')
 		axes[idx + 1].axis('off')
 	
-	plt.suptitle("Image Segmentation - Comparing 3 Clustering Models", 
+	plt.suptitle(f"Image Segmentation - Comparing {len(results)} Clustering Models", 
                  fontsize=16, fontweight='bold', y=0.98)
 	plt.tight_layout()
 	#plt.savefig('test_clustering_results.png', dpi=150, bbox_inches='tight')
@@ -105,7 +106,7 @@ def main():
     
 	print("\n" + "="*60)
 	print("Testing complete! You can now run the GUI application.")
-	print("Run: python apptkr_imageprocessing.py")
+	print("Run: python appstr_imageprocessing.py")
 	print("="*60)
 
 if __name__ == "__main__":
