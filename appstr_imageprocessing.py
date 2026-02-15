@@ -9,7 +9,6 @@ st.set_page_config(page_title="Image Processing", page_icon="res/icon.png")
 st.title("Image Segmentation - Clustering")
 st.markdown("Compare different unsupervised learning algorithms for image segmentation.")
 
-@st.cache_data
 def load_image(_path):
     im = Image.open(_path)
     im = im.convert('RGB')
@@ -28,7 +27,6 @@ def prepare_pixels(pil_image):
     pixels = img_array.reshape((total_pixels, 3))
     return pixels, height, width, img_array
 
-@st.cache_data
 def process_image(_im):
     return _im
 
@@ -86,7 +84,7 @@ def apply_clustering(pixels, img_shape, model_type, parameters):
 st.sidebar.title("Settings")
 model_type = st.sidebar.selectbox(
     "Select Clustering Algorithm",
-    ["K-Means", "GMM", "DBSCAN", "Agglomerative"],
+    ["K-Means", "GMM", "DBSCAN"],
     help="Choose which algorithm to use for image segmentation"
 )
 
@@ -143,14 +141,6 @@ elif model_type == "DBSCAN":
     else:
         parameters["xy_weight"] = 0.0
 
-elif model_type == "Agglomerative":
-    parameters["n_clusters"] = st.sidebar.slider(
-        "Number of Clusters",
-        min_value=2,
-        max_value=10,
-        value=6,
-        help="How many regions to create"
-    )
 
 # Main file uploader
 st.markdown("---")
