@@ -61,11 +61,31 @@ def main():
     run_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n✓ Saving outputs to: {run_dir}")
     
+    dbscan_sweep = [
+        {"eps": 0.045, "min_samples": 20, "xy_weight": 0.35},
+        {"eps": 0.05, "min_samples": 20, "xy_weight": 0.35},
+        {"eps": 0.055, "min_samples": 30, "xy_weight": 0.35},
+        {"eps": 0.06, "min_samples": 30, "xy_weight": 0.4},
+        {"eps": 0.06, "min_samples": 50, "xy_weight": 0.25},
+    ]
+
     models_to_test = [
         (KMeansModel(n_clusters=6), "K-Means (6 clusters)"),
         (GMMModel(n_components=6), "GMM (6 components)"),
-        (DBSCANModel(eps=0.08, min_samples=30, use_xy=True, xy_weight=0.35), "DBSCAN (RGB+XY, eps=0.08)"),
     ]
+
+    for cfg in dbscan_sweep:
+        model = DBSCANModel(
+            eps=cfg["eps"],
+            min_samples=cfg["min_samples"],
+            use_xy=True,
+            xy_weight=cfg["xy_weight"],
+        )
+        name = (
+            "DBSCAN (RGB+XY, eps="
+            f"{cfg['eps']}, min_samples={cfg['min_samples']}, xy_w={cfg['xy_weight']})"
+        )
+        models_to_test.append((model, name))
     
     results = []
     for model, name in models_to_test:

@@ -53,7 +53,7 @@ class GMMModel(ClusteringModel):
         self.model = GaussianMixture(n_components=self.n_components, random_state=42)
      
 class DBSCANModel(ClusteringModel):
-    def __init__(self, eps=0.15, min_samples=50, max_fit_pixels=20000, use_xy=True, xy_weight=0.35):
+    def __init__(self, eps=0.06, min_samples=50, max_fit_pixels=20000, use_xy=True, xy_weight=0.25):
         super().__init__()
         self.eps = eps
         self.min_samples = min_samples
