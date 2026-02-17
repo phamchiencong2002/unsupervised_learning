@@ -65,18 +65,6 @@ def apply_clustering(pixels, img_shape, model_type, parameters):
         labels = model.fit_predict(pixels, img_shape)
         return labels
     
-    elif model_type == "Agglomerative":
-        height, width = img_shape[:2]
-        n_clusters = parameters["n_clusters"]
-        connectivity = grid_to_graph(height, width)
-        model = AgglomerativeClustering(
-            n_clusters=n_clusters,
-            connectivity=connectivity,
-            linkage='ward'
-        )
-        labels = model.fit_predict(pixels)
-        return labels
-    
     else:
         raise ValueError("Invalid model type")
 
